@@ -1,9 +1,41 @@
-import { ApprovalDecision, ApprovalRequestState, ClaimStatus, NotificationType, WorkflowMode } from "@prisma/client";
+import {
+  ApprovalDecision,
+  ApprovalRequestState,
+  ClaimStatus,
+  NotificationType,
+  Prisma,
+  WorkflowMode
+} from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { createAuditLog } from "@/lib/services/audit-service";
 import { createNotification } from "@/lib/services/notification-service";
-import { evaluateApprovalRule } from "@/lib/services/workflow-engine";
+import { attachWorkflowToClaim, evaluateApprovalRule } from "@/lib/services/workflow-engine";
+import { mapClaimToView } from "@/lib/view-models";
+
+const claimInclude = {
+  employee: { include: { employeeProfile: { include: { department: true } } } },
+  receipts: { include: { ocrExtraction: true } },
+  fraudFlags: true,
+  approvalActions: { include: { actor: true } },
+  approvalRequests: { include: { approver: true } },
+  lineItems: true
+} satisfies Prisma.ExpenseClaimInclude;
+
+async function reconcileSubmittedClaims(companyId: string) {
+  const danglingClaims = await prisma.expenseClaim.findMany({
+    where: {
+      companyId,
+      status: ClaimStatus.SUBMITTED,
+      approvalRequests: { none: {} }
+    },
+    select: { id: true }
+  });
+
+  for (const claim of danglingClaims) {
+    await attachWorkflowToClaim(claim.id);
+  }
+}
 
 async function moveClaimForward(claimId: string) {
   const claim = await prisma.expenseClaim.findUnique({
@@ -105,6 +137,72 @@ export async function getPendingApprovals(userId: string) {
     },
     orderBy: { createdAt: "asc" }
   });
+}
+
+export async function listApprovalDashboardClaims(input: {
+  userId: string;
+  companyId: string;
+  roleKey: string;
+}) {
+  await reconcileSubmittedClaims(input.companyId);
+
+  const where: Prisma.ExpenseClaimWhereInput =
+    input.roleKey === "ADMIN"
+      ? {
+          companyId: input.companyId,
+          OR: [
+            { approvalRequests: { some: {} } },
+            { approvalActions: { some: {} } },
+            {
+              status: {
+                in: [
+                  ClaimStatus.SUBMITTED,
+                  ClaimStatus.PENDING_MANAGER_APPROVAL,
+                  ClaimStatus.PENDING_FINANCE_APPROVAL,
+                  ClaimStatus.PENDING_DIRECTOR_APPROVAL,
+                  ClaimStatus.PENDING_CONDITIONAL_APPROVAL,
+                  ClaimStatus.APPROVED,
+                  ClaimStatus.REJECTED,
+                  ClaimStatus.IN_PAYMENT_QUEUE,
+                  ClaimStatus.PAID,
+                  ClaimStatus.SENT_BACK,
+                  ClaimStatus.ESCALATED
+                ]
+              }
+            }
+          ]
+        }
+      : {
+          companyId: input.companyId,
+          OR: [
+            { approvalRequests: { some: { approverId: input.userId } } },
+            { approvalActions: { some: { actorId: input.userId } } },
+            {
+              employee: { employeeProfile: { managerUserId: input.userId } },
+              status: {
+                in: [
+                  ClaimStatus.SUBMITTED,
+                  ClaimStatus.PENDING_MANAGER_APPROVAL,
+                  ClaimStatus.PENDING_FINANCE_APPROVAL,
+                  ClaimStatus.PENDING_DIRECTOR_APPROVAL,
+                  ClaimStatus.PENDING_CONDITIONAL_APPROVAL,
+                  ClaimStatus.REJECTED,
+                  ClaimStatus.APPROVED,
+                  ClaimStatus.IN_PAYMENT_QUEUE,
+                  ClaimStatus.PAID
+                ]
+              }
+            }
+          ]
+        };
+
+  const claims = await prisma.expenseClaim.findMany({
+    where,
+    include: claimInclude,
+    orderBy: { updatedAt: "desc" }
+  });
+
+  return claims.map(mapClaimToView);
 }
 
 export async function applyApprovalAction(input: {

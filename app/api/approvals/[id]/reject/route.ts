@@ -3,6 +3,8 @@ import { ApprovalDecision } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { applyApprovalAction } from "@/lib/services/approval-service";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const user = await requireUser();

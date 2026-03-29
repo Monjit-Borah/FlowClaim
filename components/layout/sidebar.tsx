@@ -50,8 +50,8 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="surface sticky top-6 hidden h-[calc(100vh-3rem)] flex-col justify-between bg-transparent p-5 lg:flex">
-      <div className="space-y-8">
+    <aside className="surface sticky top-6 hidden max-h-[calc(100vh-3rem)] min-h-0 flex-col overflow-hidden bg-transparent p-5 lg:flex">
+      <div className="min-h-0 flex-1 space-y-8 overflow-y-auto pr-2">
         <div className="flex items-center gap-3">
           <div className="rounded-[18px] border border-border p-3 text-foreground">
             <BriefcaseBusiness className="h-5 w-5" />
@@ -90,7 +90,7 @@ export function Sidebar() {
         ))}
       </div>
 
-      <div className="rounded-[22px] border border-border/70 bg-transparent p-4">
+      <div className="mt-5 shrink-0 rounded-[22px] border border-border/70 bg-transparent p-4">
         <p className="text-sm font-medium text-foreground">Autonomous review agent</p>
         <p className="mt-2 text-sm text-muted">
           4 claims moved straight to payout today with no manual follow-up.

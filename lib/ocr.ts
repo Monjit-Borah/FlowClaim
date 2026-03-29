@@ -1,5 +1,7 @@
 import Tesseract from "tesseract.js";
 
+import { env } from "@/lib/env";
+
 const amountPattern = /(?:total|amount|balance)[^\d]{0,10}(\d+[.,]\d{2})/i;
 const taxPattern = /(?:tax|vat)[^\d]{0,10}(\d+[.,]\d{2})/i;
 const datePattern =
@@ -27,13 +29,7 @@ function suggestCategory(text: string) {
   return "General";
 }
 
-export async function runOcrFromUrl(fileUrl: string) {
-  const absoluteUrl = fileUrl.startsWith("http")
-    ? fileUrl
-    : `${process.env.APP_URL ?? "http://localhost:3000"}${fileUrl}`;
-
-  const result = await Tesseract.recognize(absoluteUrl, "eng");
-  const text = result.data.text ?? "";
+function mapTextToExtraction(text: string, confidence: number) {
   const lines = text
     .split("\n")
     .map((line) => line.trim())
@@ -46,8 +42,8 @@ export async function runOcrFromUrl(fileUrl: string) {
     date: parseDate(text),
     currency: "USD",
     suggestedCategory: suggestCategory(text),
-    confidence: Number((result.data.confidence / 100).toFixed(2)),
-    lowConfidenceKeys: result.data.confidence < 75 ? ["amount", "date"] : [],
+    confidence: Number(confidence.toFixed(2)),
+    lowConfidenceKeys: confidence < 0.75 ? ["amount", "date"] : [],
     rawText: text,
     lineItems: lines.slice(0, 6).map((line, index) => ({
       id: `ocr-line-${index + 1}`,
@@ -55,4 +51,64 @@ export async function runOcrFromUrl(fileUrl: string) {
       amount: 0
     }))
   };
+}
+
+async function runExternalOcr(file: File) {
+  if (!env.OCR_API_KEY) return null;
+
+  const payload = new FormData();
+  payload.append("apikey", env.OCR_API_KEY);
+  payload.append("language", "eng");
+  payload.append("isOverlayRequired", "false");
+  payload.append("file", file);
+
+  const response = await fetch("https://api.ocr.space/parse/image", {
+    method: "POST",
+    body: payload
+  });
+
+  if (!response.ok) {
+    throw new Error("External OCR request failed.");
+  }
+
+  const result = (await response.json()) as {
+    IsErroredOnProcessing?: boolean;
+    ParsedResults?: Array<{ ParsedText?: string }>;
+    OCRExitCode?: number;
+    ErrorMessage?: string | string[];
+  };
+
+  if (result.IsErroredOnProcessing || !result.ParsedResults?.length) {
+    const detail = Array.isArray(result.ErrorMessage) ? result.ErrorMessage.join(", ") : result.ErrorMessage;
+    throw new Error(detail || "OCR provider could not read the receipt.");
+  }
+
+  const text = result.ParsedResults.map((entry) => entry.ParsedText ?? "").join("\n").trim();
+  return mapTextToExtraction(text, 0.92);
+}
+
+async function runLocalOcr(input: string | File) {
+  const result = await Tesseract.recognize(input as never, "eng");
+  const text = result.data.text ?? "";
+  return mapTextToExtraction(text, result.data.confidence / 100);
+}
+
+export async function runOcrFromFile(file: File, fallbackPath?: string) {
+  if (env.OCR_API_KEY) {
+    try {
+      return await runExternalOcr(file);
+    } catch {
+      if (!fallbackPath) throw new Error("OCR processing failed.");
+    }
+  }
+
+  return runLocalOcr(fallbackPath ?? file);
+}
+
+export async function runOcrFromUrl(fileUrl: string) {
+  const absoluteUrl = fileUrl.startsWith("http")
+    ? fileUrl
+    : `${process.env.APP_URL ?? "http://localhost:3000"}${fileUrl}`;
+
+  return runLocalOcr(absoluteUrl);
 }

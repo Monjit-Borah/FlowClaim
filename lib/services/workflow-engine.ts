@@ -1,6 +1,7 @@
-import { ApprovalRequestState, ClaimStatus, Prisma, WorkflowMode } from "@prisma/client";
+import { ApprovalRequestState, ClaimStatus, NotificationType, Prisma, WorkflowMode } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
+import { createNotification } from "@/lib/services/notification-service";
 import { mapWorkflowTemplate } from "@/lib/view-models";
 
 export async function listWorkflowTemplates(companyId: string) {
@@ -141,6 +142,16 @@ export async function attachWorkflowToClaim(claimId: string) {
       state: ApprovalRequestState.PENDING
     }))
   });
+
+  for (const approverId of approverIds) {
+    await createNotification({
+      companyId: claim.companyId,
+      userId: approverId,
+      type: NotificationType.APPROVAL,
+      title: "Approval requested",
+      description: `${claim.merchant} is waiting for your ${firstStep.name.toLowerCase()} approval.`
+    });
+  }
 
   return template;
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Camera, UploadCloud } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,8 +11,9 @@ import { SectionHeading } from "@/components/shared/section-heading";
 
 export default function CreateExpensePage() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
   const [form, setForm] = useState({
     amount: "138",
@@ -29,51 +30,88 @@ export default function CreateExpensePage() {
     [form.amount, form.currency]
   );
 
+  function validateForm(forOcr: boolean) {
+    if (!form.amount || Number.isNaN(Number(form.amount)) || Number(form.amount) <= 0) {
+      return "Enter a valid amount.";
+    }
+    if (!form.expenseDate) {
+      return "Expense date is required.";
+    }
+    if (!form.description.trim()) {
+      return "Description is required.";
+    }
+    if (!form.merchant.trim()) {
+      return "Merchant is required.";
+    }
+    if (forOcr && !receipt) {
+      return "Please upload a receipt before running OCR.";
+    }
+    return "";
+  }
+
   async function createAndUpload(submitAfter = false) {
     setError("");
-    const claimResponse = await fetch("/api/expenses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: Number(form.amount),
-        currency: form.currency,
-        category: form.category,
-        merchant: form.merchant,
-        expenseDate: form.expenseDate,
-        description: form.description,
-        notes: form.notes
-      })
-    });
-
-    if (!claimResponse.ok) {
-      setError("Failed to create claim draft.");
+    setSuccess("");
+    const validationError = validateForm(submitAfter);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    const claim = await claimResponse.json();
+    setIsSubmitting(true);
 
-    if (receipt) {
-      const uploadForm = new FormData();
-      uploadForm.set("claimId", claim.id);
-      uploadForm.set("receipt", receipt);
-      const uploadResponse = await fetch("/api/expenses/upload-receipt", {
+    try {
+      const claimResponse = await fetch("/api/expenses", {
         method: "POST",
-        body: uploadForm
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: Number(form.amount),
+          currency: form.currency,
+          category: form.category,
+          merchant: form.merchant.trim(),
+          expenseDate: form.expenseDate,
+          description: form.description.trim(),
+          notes: form.notes.trim()
+        })
       });
-      if (!uploadResponse.ok) {
-        setError("Claim saved, but receipt upload failed.");
+
+      if (!claimResponse.ok) {
+        const data = await claimResponse.json().catch(() => ({ message: "Failed to create claim draft." }));
+        setError(data.message ?? "Failed to create claim draft.");
         return;
       }
-    }
 
-    startTransition(() => {
+      const claim = await claimResponse.json();
+
+      if (receipt) {
+        const uploadForm = new FormData();
+        uploadForm.set("claimId", claim.id);
+        uploadForm.set("receipt", receipt);
+        const uploadResponse = await fetch("/api/expenses/upload-receipt", {
+          method: "POST",
+          body: uploadForm
+        });
+        if (!uploadResponse.ok) {
+          const data = await uploadResponse.json().catch(() => ({
+            message: "Claim saved, but receipt upload or OCR failed."
+          }));
+          setError(data.message ?? "Claim saved, but receipt upload or OCR failed.");
+          return;
+        }
+      }
+
+      setSuccess(submitAfter ? "OCR completed. Opening review..." : "Draft saved successfully.");
       router.push(
         submitAfter
           ? `/app/employee/claims/review?id=${claim.id}`
           : `/app/employee/claims/${claim.id}`
       );
       router.refresh();
-    });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong while saving the claim.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -106,11 +144,12 @@ export default function CreateExpensePage() {
             <Textarea className="sm:col-span-2" value={form.notes} onChange={(e) => setForm((current) => ({ ...current, notes: e.target.value }))} placeholder="Notes or justification" />
           </div>
           {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
+          {success ? <p className="mt-4 text-sm text-emerald-300">{success}</p> : null}
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button onClick={() => createAndUpload(true)} disabled={isPending}>
-              {isPending ? "Working..." : "Run OCR and continue"}
+            <Button type="button" onClick={() => createAndUpload(true)} disabled={isSubmitting}>
+              {isSubmitting ? "Working..." : "Run OCR and continue"}
             </Button>
-            <Button variant="secondary" onClick={() => createAndUpload(false)} disabled={isPending}>
+            <Button type="button" variant="secondary" onClick={() => createAndUpload(false)} disabled={isSubmitting}>
               Save draft
             </Button>
           </div>

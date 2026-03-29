@@ -11,6 +11,7 @@ export async function saveUploadedFile(file: File) {
 
   return {
     fileName: safeName,
+    filePath,
     fileUrl: `/uploads/${safeName}`,
     mimeType: file.type,
     size: file.size
