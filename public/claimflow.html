@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClaimFlow AI — Intelligent Reimbursement OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.73/build/spline-viewer.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --glass-bg: rgba(255,255,255,0.04);
+    --glass-border: rgba(255,255,255,0.10);
+    --glass-shine: rgba(255,255,255,0.06);
+    --accent: #a8edca;
+    --accent2: #7dd3fc;
+    --accent3: #e2c4f8;
+    --text: #f0f0f0;
+    --muted: rgba(255,255,255,0.45);
+    --dark: #050508;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── Spline Background ── */
+  .spline-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  spline-viewer {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  #logo {
+    visibility: hidden;
+  }
+
+  /* ── Noise overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    opacity: 0.5;
+  }
+
+  /* ── Dark radial vignette ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, rgba(5,5,8,0.75) 100%);
+  }
+
+  /* ── Page wrapper ── */
+  .page { position: relative; z-index: 2; }
+
+  /* ── Glass mixin ── */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow:
+      0 0 0 0.5px rgba(255,255,255,0.05) inset,
+      0 8px 60px rgba(0,0,0,0.5),
+      0 1px 0 rgba(255,255,255,0.08) inset;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(900px, calc(100% - 40px));
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 100px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.07) inset;
+    animation: fadeDown 0.8s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 12px var(--accent); opacity: 1; }
+    50%      { box-shadow: 0 0 24px var(--accent); opacity: 0.7; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: 100px;
+    transition: all 0.2s;
+  }
+
+  .nav-links a:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .nav-cta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-ghost {
+    font-size: 13px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+
+  .btn-primary {
+    font-size: 13px;
+    font-weight: 500;
+    color: #000;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: inherit;
+    transition: all 0.25s;
+    box-shadow: 0 0 20px rgba(168,237,202,0.3);
+  }
+
+  .btn-primary:hover {
+    background: #c5f5dc;
+    box-shadow: 0 0 30px rgba(168,237,202,0.5);
+    transform: translateY(-1px);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    gap: 32px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px 6px 8px;
+    background: rgba(168,237,202,0.08);
+    border: 1px solid rgba(168,237,202,0.2);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    animation: fadeUp 0.8s 0.2s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -3px;
+    width: min(100%, 1200px);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeUp 0.8s 0.35s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .hero-title .title-line {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    text-wrap: balance;
+  }
+
+  .hero-title .word-accent {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(15px, 2vw, 18px);
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.7;
+    font-weight: 300;
+    animation: fadeUp 0.8s 0.5s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.65s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .btn-hero-primary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: inherit;
+    transition: all 0.25s;
+    box-shadow: 0 0 40px rgba(168,237,202,0.35);
+  }
+
+  .btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 60px rgba(168,237,202,0.5);
+  }
+
+  .btn-hero-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: inherit;
+    backdrop-filter: blur(10px);
+    transition: all 0.25s;
+  }
+
+  .btn-hero-secondary:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+  }
+
+  .btn-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    flex-shrink: 0;
+  }
+
+  /* ── METRICS STRIP ── */
+  .metrics-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.8s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .metric-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 100px;
+    font-size: 13px;
+  }
+
+  .metric-pill .val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+  }
+
+  .metric-pill .label { color: var(--muted); font-size: 12px; }
+
+  .metric-pill .delta {
+    font-size: 11px;
+    color: #4ade80;
+    background: rgba(74,222,128,0.1);
+    padding: 2px 7px;
+    border-radius: 100px;
+    border: 1px solid rgba(74,222,128,0.2);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 100px 24px; position: relative; }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 540px;
+    margin-bottom: 60px;
+  }
+
+  /* ── WHY SECTION CARDS ── */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .why-card {
+    padding: 32px 28px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    transition: all 0.4s cubic-bezier(.16,1,.3,1);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  .why-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  }
+
+  .why-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 60% -20%, rgba(168,237,202,0.06), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .why-card:hover {
+    border-color: rgba(168,237,202,0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(168,237,202,0.1);
+  }
+
+  .why-card:hover::after { opacity: 1; }
+
+  .why-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(168,237,202,0.08);
+    border: 1px solid rgba(168,237,202,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .why-icon svg,
+  .role-feat-icon svg,
+  .claim-icon svg,
+  .status-inline-icon,
+  .alert-inline-icon,
+  .inline-data-icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+  }
+
+  .status-inline-icon,
+  .alert-inline-icon,
+  .inline-data-icon {
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .why-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+  }
+
+  .why-card p {
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── PRODUCT PREVIEW ── */
+  .product-section { padding: 80px 24px 120px; }
+
+  .steps-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+
+  .step-pill {
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .step-pill.active, .step-pill:hover {
+    background: rgba(168,237,202,0.1);
+    border-color: rgba(168,237,202,0.3);
+    color: var(--accent);
+  }
+
+  /* Big preview card */
+  .preview-card {
+    position: relative;
+    padding: 40px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 32px;
+    overflow: hidden;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .preview-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(168,237,202,0.3) 50%, transparent 100%);
+  }
+
+  .preview-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .preview-block {
+    padding: 24px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .preview-block::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  }
+
+  .preview-block-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* Simulated receipt */
+  .receipt-lines { display: flex; flex-direction: column; gap: 10px; }
+  .receipt-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    font-size: 12px;
+  }
+  .receipt-line .rl { color: var(--muted); }
+  .receipt-line .rv { font-weight: 500; }
+  .conf-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .conf-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    animation: growBar 1.5s ease-out both;
+  }
+  @keyframes growBar { from { width: 0; } }
+
+  /* Simulated approval flow */
+  .approval-flow { display: flex; flex-direction: column; gap: 8px; }
+  .flow-node {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .flow-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .flow-dot.done { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .flow-dot.active { background: var(--accent2); box-shadow: 0 0 8px var(--accent2); animation: pulse 1.5s infinite; }
+  .flow-dot.pending { background: rgba(255,255,255,0.2); }
+  .flow-label { flex: 1; color: var(--muted); }
+  .flow-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+  .flow-status.approved { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+  .flow-status.reviewing { background: rgba(125,211,252,0.1); color: var(--accent2); border: 1px solid rgba(125,211,252,0.2); }
+  .flow-status.waiting { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+
+  /* Fraud score */
+  .fraud-score-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .fraud-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .fraud-item .fi-label { color: var(--muted); flex: 1; }
+  .fraud-bar { flex: 2; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .fraud-bar-fill { height: 100%; border-radius: 3px; animation: growBar 1.5s ease-out both; }
+  .fraud-bar-fill.low { background: #4ade80; width: 15%; }
+  .fraud-bar-fill.med { background: #facc15; width: 48%; }
+  .fraud-bar-fill.safe { background: var(--accent); width: 94%; }
+  .fraud-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+
+  /* Finance queue */
+  .finance-rows { display: flex; flex-direction: column; gap: 8px; }
+  .finance-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    font-size: 12px;
+  }
+  .finance-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .finance-info { flex: 1; }
+  .finance-name { font-size: 12px; margin-bottom: 1px; }
+  .finance-type { color: var(--muted); font-size: 10px; }
+  .finance-amount { font-weight: 600; font-size: 13px; }
+  .finance-payout-btn {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: rgba(168,237,202,0.1);
+    border: 1px solid rgba(168,237,202,0.2);
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .finance-payout-btn:hover { background: rgba(168,237,202,0.2); }
+
+  /* ── ROLES SECTION ── */
+  .roles-section { padding: 80px 24px; }
+
+  .roles-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  .role-tab {
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    color: var(--muted);
+    font-family: inherit;
+  }
+
+  .role-tab.active {
+    background: rgba(168,237,202,0.1);
+    border-color: rgba(168,237,202,0.3);
+    color: var(--accent);
+  }
+
+  .roles-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .role-desc {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .role-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+  }
+
+  .role-feature-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .role-feat {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .role-feat-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--accent);
+  }
+
+  .role-preview {
+    padding: 32px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 28px;
+    min-height: 400px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .role-preview::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  }
+
+  .rp-header {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: var(--muted);
+  }
+
+  /* Employee preview elements */
+  .claim-card {
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .claim-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: rgba(168,237,202,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+  }
+
+  .action-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    cursor: pointer;
+  }
+
+  .action-chip svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.2;
+  }
+
+  .action-chip.approve {
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
+    color: #4ade80;
+  }
+
+  .action-chip.reject {
+    background: rgba(255,100,100,0.08);
+    border: 1px solid rgba(255,100,100,0.2);
+    color: #f87171;
+  }
+  .claim-info { flex: 1; }
+  .claim-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .claim-amount { font-size: 11px; color: var(--muted); }
+  .claim-status-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  .status-approved { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+  .status-review   { background: rgba(125,211,252,0.1); color: var(--accent2); border: 1px solid rgba(125,211,252,0.2); }
+  .status-draft    { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* Sparkline fake */
+  .sparkline-container { margin-top: 4px; }
+  .sparkline-label { font-size: 10px; color: var(--muted); margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+  .sparkline-svg { width: 100%; }
+
+  /* ── CTA SECTION ── */
+  .cta-section { padding: 80px 24px 160px; }
+
+  .cta-card {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 80px 60px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(168,237,202,0.15);
+    border-radius: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,237,202,0.5), transparent);
+  }
+
+  .cta-glow {
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 200px;
+    background: radial-gradient(ellipse, rgba(168,237,202,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -2.5px;
+    line-height: 1.0;
+    margin-bottom: 20px;
+  }
+
+  .cta-sub {
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 40px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-right {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* ── Intersection observer fade-ins ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .preview-inner { grid-template-columns: 1fr; }
+    .roles-content-grid { grid-template-columns: 1fr; }
+    .cta-card { padding: 48px 28px; }
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SPLINE BACKGROUND ══ -->
+<div class="spline-bg">
+  <spline-viewer id="logo" url="https://prod.spline.design/JMoqbh3mSTLAvW8N/scene.splinecode"></spline-viewer>
+</div>
+
+<div class="page">
+
+  <!-- ══ NAV ══ -->
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-dot"></div>
+      ClaimFlow AI
+    </div>
+    <ul class="nav-links">
+      <li><a href="#why">Why</a></li>
+      <li><a href="#product">Product</a></li>
+      <li><a href="#roles">Roles</a></li>
+    </ul>
+    <div class="nav-cta">
+      <button class="btn-ghost" onclick="navigateTop('/login')">Login</button>
+      <button class="btn-primary" onclick="navigateTop('/signup')">Get started</button>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Premium Reimbursement OS
+    </div>
+
+    <h1 class="hero-title">
+      <span class="title-line">Intelligent</span>
+      <span class="title-line word-accent">reimbursement</span>
+      <span class="title-line">operating system</span>
+    </h1>
+
+    <p class="hero-sub">
+      ClaimFlow AI turns reimbursement chaos into governed, real-time operations.
+      OCR extraction, adaptive routing, fraud checks, policy enforcement,
+      and finance-ready payouts in one premium workflow layer.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-hero-primary" onclick="navigateTop('/login')">
+        <i data-lucide="zap" class="btn-icon"></i> Launch demo workspace
+      </button>
+      <button class="btn-hero-secondary" onclick="document.getElementById('product').scrollIntoView({ behavior: 'smooth' })">
+        <i data-lucide="play" class="btn-icon"></i> Explore product tour
+      </button>
+    </div>
+
+    <!-- Live metrics -->
+    <div class="metrics-strip">
+      <div class="metric-pill">
+        <span class="val">18h</span>
+        <div>
+          <div class="label">Approval velocity</div>
+        </div>
+        <span class="delta">↓ 6h</span>
+      </div>
+      <div class="metric-pill">
+        <span class="val">94%</span>
+        <div><div class="label">OCR confidence</div></div>
+      </div>
+      <div class="metric-pill">
+        <span class="val">96%</span>
+        <div><div class="label">Policy compliance</div></div>
+      </div>
+      <div class="metric-pill">
+        <span class="val">4.8×</span>
+        <div><div class="label">Fraud catch rate</div></div>
+      </div>
+      <div class="metric-pill">
+        <span class="val">71%</span>
+        <div><div class="label">Straight-through payouts</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ WHY SECTION ══ -->
+  <section id="why">
+    <div class="container">
+      <div class="section-label reveal">Why teams switch</div>
+      <h2 class="section-title reveal reveal-delay-1">Built for finance leaders<br/>who want control.</h2>
+      <p class="section-sub reveal reveal-delay-2">
+        ClaimFlow AI gives every stakeholder a role-aware control center while keeping the employee journey as simple as scanning and submitting.
+      </p>
+
+      <div class="why-grid">
+        <div class="why-card reveal reveal-delay-1">
+          <div class="why-icon"><i data-lucide="scan-search"></i></div>
+          <h3>Receipt Intelligence</h3>
+          <p>OCR extraction, confidence scoring, category suggestion, and editable review before submit.</p>
+        </div>
+        <div class="why-card reveal reveal-delay-2">
+          <div class="why-icon"><i data-lucide="git-branch-plus"></i></div>
+          <h3>Adaptive Approval Orchestration</h3>
+          <p>Sequential, parallel, percentage, CFO override, and hybrid approval logic in one engine.</p>
+        </div>
+        <div class="why-card reveal reveal-delay-3">
+          <div class="why-icon"><i data-lucide="shield-check"></i></div>
+          <h3>Policy & Fraud Command</h3>
+          <p>Real-time rule enforcement, duplicate detection, anomaly scoring, and audit-grade decisions.</p>
+        </div>
+        <div class="why-card reveal reveal-delay-4">
+          <div class="why-icon"><i data-lucide="chart-column-big"></i></div>
+          <h3>Enterprise Operating View</h3>
+          <p>Dashboards, payouts, notifications, people mapping, analytics, and reimbursement lifecycle control.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PRODUCT PREVIEW ══ -->
+  <section id="product" class="product-section">
+    <div class="container">
+      <div class="section-label reveal">Product preview</div>
+      <h2 class="section-title reveal reveal-delay-1">A calm, executive-grade<br/>command center</h2>
+      <p class="section-sub reveal reveal-delay-2">
+        Every surface is designed like a premium fintech product: rounded containers, controlled contrast, premium charts, and focused actions.
+      </p>
+
+      <div class="steps-row reveal reveal-delay-2">
+        <button class="step-pill active">01 OCR Extraction</button>
+        <button class="step-pill">02 Approval Flows</button>
+        <button class="step-pill">03 Fraud & Policy</button>
+        <button class="step-pill">04 Finance Queue</button>
+      </div>
+
+      <div class="preview-card reveal reveal-delay-3">
+        <div class="preview-inner">
+
+          <!-- OCR Block -->
+          <div class="preview-block">
+            <div class="preview-block-label">OCR Extraction · Live</div>
+            <div class="receipt-lines">
+              <div class="receipt-line">
+                <span class="rl">Merchant</span>
+                <span class="rv">Marriott Hotels</span>
+              </div>
+              <div class="receipt-line">
+                <span class="rl">Category</span>
+                <span class="rv"><i data-lucide="building-2" class="inline-data-icon"></i> Accommodation</span>
+              </div>
+              <div class="receipt-line">
+                <span class="rl">Amount</span>
+                <span class="rv" style="color:var(--accent)">$1,249.00</span>
+              </div>
+              <div class="receipt-line">
+                <span class="rl">Date</span>
+                <span class="rv">Mar 28, 2026</span>
+              </div>
+            </div>
+            <div style="margin-top:14px;">
+              <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Confidence Score</div>
+              <div class="conf-bar"><div class="conf-fill" style="width:94%"></div></div>
+              <div style="font-size:11px;color:var(--accent);margin-top:4px;">94% · High confidence</div>
+            </div>
+          </div>
+
+          <!-- Approval Flow -->
+          <div class="preview-block">
+            <div class="preview-block-label">Approval Orchestration</div>
+            <div class="approval-flow">
+              <div class="flow-node">
+                <div class="flow-dot done"></div>
+                <span class="flow-label">Direct Manager</span>
+                <span class="flow-status approved">Approved</span>
+              </div>
+              <div class="flow-node">
+                <div class="flow-dot active"></div>
+                <span class="flow-label">Finance Review</span>
+                <span class="flow-status reviewing">Reviewing</span>
+              </div>
+              <div class="flow-node">
+                <div class="flow-dot pending"></div>
+                <span class="flow-label">CFO Override</span>
+                <span class="flow-status waiting">Pending</span>
+              </div>
+              <div class="flow-node">
+                <div class="flow-dot pending"></div>
+                <span class="flow-label">Payout Release</span>
+                <span class="flow-status waiting">Queued</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fraud & Policy -->
+          <div class="preview-block">
+            <div class="preview-block-label">Fraud & Policy Analysis</div>
+            <div class="fraud-score-wrap">
+              <div class="fraud-item">
+                <span class="fi-label">Duplicate Risk</span>
+                <div class="fraud-bar"><div class="fraud-bar-fill low"></div></div>
+                <span class="fraud-badge" style="background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.2)">Low</span>
+              </div>
+              <div class="fraud-item">
+                <span class="fi-label">Anomaly Score</span>
+                <div class="fraud-bar"><div class="fraud-bar-fill med"></div></div>
+                <span class="fraud-badge" style="background:rgba(250,204,21,0.1);color:#facc15;border:1px solid rgba(250,204,21,0.2)">Med</span>
+              </div>
+              <div class="fraud-item">
+                <span class="fi-label">Policy Match</span>
+                <div class="fraud-bar"><div class="fraud-bar-fill safe"></div></div>
+                <span class="fraud-badge" style="background:rgba(168,237,202,0.1);color:var(--accent);border:1px solid rgba(168,237,202,0.2)">Pass</span>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:10px 14px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:12px;font-size:11px;color:#4ade80;">
+              <i data-lucide="badge-check" class="status-inline-icon"></i> Claim cleared and recommended for approval
+            </div>
+          </div>
+
+          <!-- Finance Queue -->
+          <div class="preview-block">
+            <div class="preview-block-label">Finance Queue · Payouts</div>
+            <div class="finance-rows">
+              <div class="finance-row">
+                <div class="finance-avatar" style="background:rgba(168,237,202,0.15);color:var(--accent)">AS</div>
+                <div class="finance-info">
+                  <div class="finance-name">Arjun Sharma</div>
+                  <div class="finance-type">Travel · Approved</div>
+                </div>
+                <span class="finance-amount">$1,249</span>
+                <button class="finance-payout-btn">Pay</button>
+              </div>
+              <div class="finance-row">
+                <div class="finance-avatar" style="background:rgba(125,211,252,0.15);color:var(--accent2)">PK</div>
+                <div class="finance-info">
+                  <div class="finance-name">Priya K.</div>
+                  <div class="finance-type">Software · Approved</div>
+                </div>
+                <span class="finance-amount">$340</span>
+                <button class="finance-payout-btn">Pay</button>
+              </div>
+              <div class="finance-row">
+                <div class="finance-avatar" style="background:rgba(226,196,248,0.15);color:var(--accent3)">MR</div>
+                <div class="finance-info">
+                  <div class="finance-name">Meera R.</div>
+                  <div class="finance-type">Meals · Approved</div>
+                </div>
+                <span class="finance-amount">$87</span>
+                <button class="finance-payout-btn">Pay</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ ROLES SECTION ══ -->
+  <section id="roles" class="roles-section">
+    <div class="container">
+      <div class="section-label reveal">Role-based showcase</div>
+      <h2 class="section-title reveal reveal-delay-1">Every stakeholder,<br/>perfectly served.</h2>
+
+      <div class="roles-tabs reveal reveal-delay-2">
+        <button class="role-tab active" onclick="switchRole('employees', this)">Employees</button>
+        <button class="role-tab" onclick="switchRole('managers', this)">Managers</button>
+        <button class="role-tab" onclick="switchRole('finance', this)">Admins & Finance</button>
+      </div>
+
+      <div id="role-employees" class="roles-content-grid">
+        <div class="role-desc reveal reveal-delay-1">
+          <div class="role-title">Scan.<br/>Submit.<br/>Track.</div>
+          <p style="color:var(--muted);font-size:14px;line-height:1.7;font-weight:300;">Scan receipts, edit OCR outputs, submit polished claims, and track every reimbursement milestone.</p>
+          <div class="role-feature-list">
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="camera"></i></span> Scan receipts directly and let OCR auto-fill every field</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="square-pen"></i></span> Edit extracted data with confidence review</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="map-pinned"></i></span> Track claim status at every milestone</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="message-square-text"></i></span> Get notified on approvals and payout completion</div>
+          </div>
+        </div>
+        <div class="role-preview reveal reveal-delay-2">
+          <div class="rp-header">My Claims</div>
+          <div class="claim-card">
+            <div class="claim-icon"><i data-lucide="plane"></i></div>
+            <div class="claim-info">
+              <div class="claim-name">Flight — Delhi to Mumbai</div>
+              <div class="claim-amount">₹8,200 · Submitted Mar 27</div>
+            </div>
+            <span class="claim-status-badge status-approved">Approved</span>
+          </div>
+          <div class="claim-card">
+            <div class="claim-icon"><i data-lucide="building-2"></i></div>
+            <div class="claim-info">
+              <div class="claim-name">Hotel — Pune offsite</div>
+              <div class="claim-amount">₹12,400 · Submitted Mar 28</div>
+            </div>
+            <span class="claim-status-badge status-review">Reviewing</span>
+          </div>
+          <div class="claim-card">
+            <div class="claim-icon"><i data-lucide="utensils-crossed"></i></div>
+            <div class="claim-info">
+              <div class="claim-name">Client dinner — Q1 close</div>
+              <div class="claim-amount">₹3,100 · Draft</div>
+            </div>
+            <span class="claim-status-badge status-draft">Draft</span>
+          </div>
+          <!-- Sparkline -->
+          <div style="margin-top:8px;">
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Reimbursement history</div>
+            <svg class="sparkline-svg" height="50" viewBox="0 0 300 50">
+              <defs>
+                <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#a8edca" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#a8edca" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,40 L30,35 L60,28 L90,32 L120,20 L150,24 L180,14 L210,18 L240,8 L270,12 L300,5" stroke="#a8edca" stroke-width="1.5" fill="none"/>
+              <path d="M0,40 L30,35 L60,28 L90,32 L120,20 L150,24 L180,14 L210,18 L240,8 L270,12 L300,5 L300,50 L0,50 Z" fill="url(#sg)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div id="role-managers" class="roles-content-grid" style="display:none">
+        <div class="role-desc">
+          <div class="role-title">Review.<br/>Decide.<br/>Escalate.</div>
+          <p style="color:var(--muted);font-size:14px;line-height:1.7;font-weight:300;">Approve faster with risk summaries, policy context, receipt previews, and escalation actions.</p>
+          <div class="role-feature-list">
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="zap"></i></span> One-click approvals with full claim context visible</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="search-check"></i></span> AI risk summaries before every decision</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="file-text"></i></span> Receipt previews with OCR confidence overlay</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="triangle-alert"></i></span> Escalate to CFO with one tap</div>
+          </div>
+        </div>
+        <div class="role-preview">
+          <div class="rp-header">Approval Inbox · 3 pending</div>
+          <div class="claim-card">
+            <div class="claim-icon"><i data-lucide="receipt"></i></div>
+            <div class="claim-info">
+              <div class="claim-name">Arjun S. — Hotel ₹12,400</div>
+              <div class="claim-amount">Risk: Low · Policy: Pass</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span class="action-chip approve"><i data-lucide="check"></i>Approve</span>
+              <span class="action-chip reject"><i data-lucide="x"></i>Reject</span>
+            </div>
+          </div>
+          <div class="claim-card">
+            <div class="claim-icon"><i data-lucide="plane"></i></div>
+            <div class="claim-info">
+              <div class="claim-name">Meera R. — Flight ₹8,200</div>
+              <div class="claim-amount">Risk: Low · Policy: Pass</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span class="action-chip approve"><i data-lucide="check"></i>Approve</span>
+              <span class="action-chip reject"><i data-lucide="x"></i>Reject</span>
+            </div>
+          </div>
+          <div style="padding:14px;background:rgba(250,204,21,0.06);border:1px solid rgba(250,204,21,0.15);border-radius:14px;font-size:12px;color:#facc15;">
+            <i data-lucide="triangle-alert" class="alert-inline-icon"></i> Priya K. — $3,400 SaaS license · Policy limit $2,000 — escalation recommended
+          </div>
+        </div>
+      </div>
+
+      <div id="role-finance" class="roles-content-grid" style="display:none">
+        <div class="role-desc">
+          <div class="role-title">Govern.<br/>Audit.<br/>Pay out.</div>
+          <p style="color:var(--muted);font-size:14px;line-height:1.7;font-weight:300;">Shape workflows, manage roles, watch analytics, audit overrides, and run payout operations.</p>
+          <div class="role-feature-list">
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="workflow"></i></span> Build adaptive approval workflows visually</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="chart-column-big"></i></span> Live analytics: spend by category, dept, period</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="lock"></i></span> Audit log for every override and decision</div>
+            <div class="role-feat"><span class="role-feat-icon"><i data-lucide="banknote-arrow-up"></i></span> Batch payout operations with one-click release</div>
+          </div>
+        </div>
+        <div class="role-preview">
+          <div class="rp-header">Finance Dashboard</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div style="padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--accent);">₹2.4L</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">Pending Payouts</div>
+            </div>
+            <div style="padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--accent2);">47</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">Claims This Month</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Spend by Category</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;">
+              <span style="flex:1;color:var(--muted);">Travel</span>
+              <div style="flex:2;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="height:100%;width:68%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;"></div></div>
+              <span>68%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;">
+              <span style="flex:1;color:var(--muted);">Software</span>
+              <div style="flex:2;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="height:100%;width:21%;background:var(--accent3);border-radius:3px;"></div></div>
+              <span>21%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;">
+              <span style="flex:1;color:var(--muted);">Meals</span>
+              <div style="flex:2;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="height:100%;width:11%;background:#facc15;border-radius:3px;"></div></div>
+              <span>11%</span>
+            </div>
+          </div>
+          <button style="margin-top:16px;width:100%;padding:10px;border-radius:12px;background:rgba(168,237,202,0.1);border:1px solid rgba(168,237,202,0.2);color:var(--accent);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,237,202,0.18)'" onmouseout="this.style.background='rgba(168,237,202,0.1)'">
+            <i data-lucide="zap" class="btn-icon"></i> Run Batch Payout · 47 claims
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CTA ══ -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card reveal">
+        <div class="cta-glow"></div>
+        <div class="cta-title">Launch a fully seeded<br/><span style="background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">workspace in minutes.</span></div>
+        <p class="cta-sub">Demo-ready enterprise SaaS. Open live product and see intelligent reimbursement, approvals, policy, fraud, analytics, and payout orchestration in action.</p>
+        <div class="cta-actions">
+          <button class="btn-hero-primary" onclick="navigateTop('/app/admin')">
+            <i data-lucide="rocket" class="btn-icon"></i> Open live product
+          </button>
+          <button class="btn-hero-secondary" onclick="navigateTop('/signup')">
+            Schedule a demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="footer-logo">
+      <div class="nav-logo-dot"></div>
+      ClaimFlow AI
+    </div>
+    <div class="footer-right">
+      Intelligent reimbursement, approvals, policy, fraud, analytics &amp; payout orchestration.
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  function navigateTop(path) {
+    if (window.top) {
+      window.top.location.href = path;
+      return;
+    }
+    window.location.href = path;
+  }
+
+  // ── Intersection Observer for .reveal ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── Role tabs ──
+  function switchRole(role, btn) {
+    document.querySelectorAll('[id^="role-"]').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('role-' + role).style.display = 'grid';
+    btn.classList.add('active');
+  }
+
+  // ── Step pills ──
+  document.querySelectorAll('.step-pill').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // ── Nav scroll effect ──
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      nav.style.background = 'rgba(5,5,8,0.7)';
+    } else {
+      nav.style.background = 'rgba(255,255,255,0.04)';
+    }
+  });
+
+  lucide.createIcons();
+</script>
+</body>
+</html>
