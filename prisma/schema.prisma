@@ -1,0 +1,393 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  SENT_BACK
+  ESCALATED
+}
+
+enum ClaimStatus {
+  DRAFT
+  OCR_PROCESSING
+  READY_FOR_REVIEW
+  SUBMITTED
+  PENDING_MANAGER_APPROVAL
+  PENDING_FINANCE_APPROVAL
+  PENDING_DIRECTOR_APPROVAL
+  PENDING_CONDITIONAL_APPROVAL
+  APPROVED
+  REJECTED
+  SENT_BACK
+  ESCALATED
+  IN_PAYMENT_QUEUE
+  PAID
+  ARCHIVED
+}
+
+enum PolicySeverity {
+  SOFT
+  HARD
+}
+
+enum FraudLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum WorkflowMode {
+  SEQUENTIAL
+  PARALLEL
+  HYBRID
+}
+
+enum NotificationType {
+  SUBMITTED
+  APPROVAL
+  APPROVED
+  REJECTED
+  SENT_BACK
+  ESCALATED
+  PAID
+  SYSTEM
+}
+
+enum ApprovalRequestState {
+  PENDING
+  DONE
+  SKIPPED
+}
+
+model Company {
+  id                    String                     @id @default(cuid())
+  name                  String
+  country               String
+  baseCurrency          String
+  industry              String?
+  size                  String?
+  approvalPreference    String?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  users                 User[]
+  departments           Department[]
+  costCenters           CostCenter[]
+  claims                ExpenseClaim[]
+  workflowTemplates     ApprovalWorkflowTemplate[]
+  policyRules           PolicyRule[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+  exchangeRateSnapshots ExchangeRateSnapshot[]
+}
+
+model Role {
+  id          String @id @default(cuid())
+  key         String @unique
+  name        String
+  description String?
+  users       User[]
+}
+
+model User {
+  id                String                 @id @default(cuid())
+  companyId         String
+  roleId            String
+  name              String
+  email             String                 @unique
+  passwordHash      String
+  avatarUrl         String?
+  status            UserStatus             @default(ACTIVE)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  company           Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  role              Role                   @relation(fields: [roleId], references: [id])
+  employeeProfile   EmployeeProfile?
+  managedProfiles   EmployeeProfile[]      @relation("ManagerProfile")
+  submittedClaims   ExpenseClaim[]         @relation("SubmittedClaims")
+  approvalRequests  ApprovalRequest[]
+  approvalActions   ApprovalAction[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  paymentsProcessed ReimbursementPayment[] @relation("ProcessedPayments")
+  sessions          Session[]
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  userId         String
+  tokenHash      String   @unique
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmployeeProfile {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  departmentId  String?
+  costCenterId  String?
+  title         String?
+  country       String?
+  managerUserId String?
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department    Department?      @relation(fields: [departmentId], references: [id])
+  costCenter    CostCenter?      @relation(fields: [costCenterId], references: [id])
+  manager       User?            @relation("ManagerProfile", fields: [managerUserId], references: [id])
+}
+
+model Department {
+  id          String            @id @default(cuid())
+  companyId   String
+  name        String
+  company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employees   EmployeeProfile[]
+  policyRules PolicyRule[]
+}
+
+model CostCenter {
+  id          String            @id @default(cuid())
+  companyId   String
+  name        String
+  code        String
+  company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employees   EmployeeProfile[]
+  claims      ExpenseClaim[]
+}
+
+model ManagerRelationship {
+  id         String   @id @default(cuid())
+  companyId  String
+  employeeId String
+  managerId  String
+  createdAt  DateTime @default(now())
+}
+
+model ExpenseClaim {
+  id                  String                 @id @default(cuid())
+  companyId           String
+  employeeId          String
+  costCenterId        String?
+  workflowTemplateId  String?
+  title               String?
+  category            String
+  description         String
+  notes               String?
+  merchant            String
+  expenseDate         DateTime
+  amount              Float
+  currency            String
+  convertedAmount     Float
+  companyCurrency     String
+  exchangeRate        Float
+  status              ClaimStatus
+  riskScore           Int                    @default(0)
+  aiSummary           String?
+  similarInsight      String?
+  justification       String?
+  isInternational     Boolean                @default(false)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  company             Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee            User                   @relation("SubmittedClaims", fields: [employeeId], references: [id])
+  costCenter          CostCenter?            @relation(fields: [costCenterId], references: [id])
+  workflowTemplate    ApprovalWorkflowTemplate? @relation(fields: [workflowTemplateId], references: [id])
+  receipts            ExpenseReceipt[]
+  lineItems           ExpenseLineItem[]
+  approvalRequests    ApprovalRequest[]
+  approvalActions     ApprovalAction[]
+  fraudFlags          FraudFlag[]
+  reimbursement       ReimbursementPayment?
+}
+
+model ExpenseReceipt {
+  id            String        @id @default(cuid())
+  claimId       String
+  fileName      String
+  fileUrl       String
+  mimeType      String?
+  size          Int?
+  createdAt     DateTime      @default(now())
+  claim         ExpenseClaim  @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  ocrExtraction OCRExtraction?
+}
+
+model OCRExtraction {
+  id                 String         @id @default(cuid())
+  receiptId          String         @unique
+  merchant           String?
+  amount             Float?
+  tax                Float?
+  date               DateTime?
+  currency           String?
+  suggestedCategory  String?
+  confidence         Float?
+  lowConfidenceKeys  Json?
+  rawText            String?
+  lineItems          Json?
+  createdAt          DateTime       @default(now())
+  receipt            ExpenseReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+}
+
+model ExpenseLineItem {
+  id      String       @id @default(cuid())
+  claimId String
+  label   String
+  amount  Float
+  claim   ExpenseClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+}
+
+model ApprovalWorkflowTemplate {
+  id          String                 @id @default(cuid())
+  companyId   String
+  name        String
+  description String?
+  trigger     String?
+  mode        WorkflowMode
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  steps       ApprovalWorkflowStep[]
+  rules       ApprovalRule[]
+  claims      ExpenseClaim[]
+}
+
+model ApprovalWorkflowStep {
+  id                  String                   @id @default(cuid())
+  templateId          String
+  name                String
+  approverType        String
+  specificUserId      String?
+  orderIndex          Int
+  mode                WorkflowMode
+  minApprovalPercent  Float?
+  overrideAutoApprove Boolean                  @default(false)
+  conditionChip       String?
+  template            ApprovalWorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model ApprovalRule {
+  id                String                   @id @default(cuid())
+  templateId        String
+  name              String
+  expression        String
+  threshold         Float?
+  category          String?
+  departmentId      String?
+  amountMin         Float?
+  amountMax         Float?
+  requiresFinance   Boolean                  @default(false)
+  country           String?
+  specificApprover  String?
+  template          ApprovalWorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model ApprovalRequest {
+  id             String               @id @default(cuid())
+  claimId        String
+  approverId     String
+  stepName       String
+  approverRole   String
+  state          ApprovalRequestState @default(PENDING)
+  createdAt      DateTime             @default(now())
+  completedAt    DateTime?
+  claim          ExpenseClaim         @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  approver       User                 @relation(fields: [approverId], references: [id])
+}
+
+model ApprovalAction {
+  id        String           @id @default(cuid())
+  claimId   String
+  actorId   String
+  stepName  String
+  decision  ApprovalDecision
+  comment   String?
+  createdAt DateTime         @default(now())
+  claim     ExpenseClaim     @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  actor     User             @relation(fields: [actorId], references: [id])
+}
+
+model PolicyRule {
+  id              String         @id @default(cuid())
+  companyId       String
+  departmentId    String?
+  name            String
+  description     String
+  severity        PolicySeverity
+  category        String?
+  threshold       Float?
+  requiresReceipt Boolean        @default(false)
+  metadata        Json?
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department      Department?    @relation(fields: [departmentId], references: [id])
+}
+
+model FraudFlag {
+  id          String       @id @default(cuid())
+  claimId     String
+  title       String
+  description String
+  level       FraudLevel
+  score       Int
+  createdAt   DateTime     @default(now())
+  claim       ExpenseClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  companyId   String
+  userId      String?
+  type        NotificationType
+  title       String
+  description String
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String    @id @default(cuid())
+  companyId String
+  actorId   String?
+  action    String
+  target    String
+  detail    String
+  createdAt DateTime  @default(now())
+  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  actor     User?     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+}
+
+model ExchangeRateSnapshot {
+  id           String    @id @default(cuid())
+  companyId    String
+  baseCurrency String
+  rates        Json
+  capturedAt   DateTime  @default(now())
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model ReimbursementPayment {
+  id              String       @id @default(cuid())
+  claimId         String       @unique
+  processorId     String?
+  amount          Float
+  currency        String
+  status          String
+  payoutReference String?
+  queuedAt        DateTime     @default(now())
+  paidAt          DateTime?
+  claim           ExpenseClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  processor       User?        @relation("ProcessedPayments", fields: [processorId], references: [id])
+}
