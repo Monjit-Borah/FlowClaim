@@ -1,0 +1,44 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#07080C"/>
+  <rect x="36" y="48" width="300" height="804" rx="30" fill="#11131A" stroke="#2C2F38" stroke-width="2"/>
+  <text x="92" y="156" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">ClaimFlow AI</text>
+  <rect x="60" y="312" width="252" height="66" rx="24" fill="#171922" stroke="#FF6D57" stroke-width="2"/>
+  <text x="104" y="353" fill="#FF7A67" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">Employee Home</text>
+
+  <rect x="372" y="48" width="1192" height="74" rx="28" fill="#11131A" stroke="#2C2F38" stroke-width="2"/>
+  <rect x="398" y="68" width="840" height="38" rx="19" fill="#090C12" stroke="#D5D9E1" stroke-width="2"/>
+
+  <rect x="390" y="156" width="220" height="42" rx="21" fill="#171922" stroke="#2C2F38" stroke-width="2"/>
+  <text x="412" y="184" fill="#B8BDC8" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="3">Employee Dashboard</text>
+  <text x="390" y="262" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700">Track, submit, and understand every claim</text>
+  <text x="390" y="310" fill="#9AA0AE" font-family="Arial, Helvetica, sans-serif" font-size="24">Upload receipts, draft expenses, follow approval progress, and review rejection reasons in one workspace.</text>
+
+  <rect x="390" y="360" width="320" height="138" rx="28" fill="#13161D" stroke="#2D323D" stroke-width="2"/>
+  <rect x="730" y="360" width="320" height="138" rx="28" fill="#13161D" stroke="#2D323D" stroke-width="2"/>
+  <rect x="1070" y="360" width="320" height="138" rx="28" fill="#13161D" stroke="#2D323D" stroke-width="2"/>
+  <text x="420" y="404" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="18">Draft Amount</text>
+  <text x="420" y="468" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">$138</text>
+  <text x="760" y="404" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="18">Pending Approval Amount</text>
+  <text x="760" y="468" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">$0</text>
+  <text x="1100" y="404" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="18">Approved Amount</text>
+  <text x="1100" y="468" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">$0</text>
+
+  <rect x="390" y="530" width="208" height="58" rx="29" fill="#11131A" stroke="#D5D9E1" stroke-width="2"/>
+  <text x="447" y="567" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="22">Upload Receipt</text>
+  <rect x="614" y="530" width="182" height="58" rx="29" fill="#11131A" stroke="#D5D9E1" stroke-width="2"/>
+  <text x="672" y="567" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="22">New Expense</text>
+
+  <rect x="390" y="620" width="1174" height="92" rx="28" fill="#13161D" stroke="#2D323D" stroke-width="2"/>
+  <text x="428" y="675" fill="#FF7A67" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Draft</text>
+  <text x="650" y="675" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="24">Waiting Approval</text>
+  <text x="940" y="675" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="24">Approved</text>
+
+  <rect x="390" y="742" width="760" height="124" rx="28" fill="#13161D" stroke="#2D323D" stroke-width="2"/>
+  <text x="420" y="790" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">My expense claims</text>
+  <line x1="390" y1="822" x2="1150" y2="822" stroke="#5F636C" stroke-width="2"/>
+  <text x="420" y="850" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="18">Odoo · shshss · 29/03/2026 · Meals · Draft</text>
+
+  <rect x="1180" y="742" width="384" height="124" rx="28" fill="#13161D" stroke="#2D323D" stroke-width="2"/>
+  <text x="1210" y="790" fill="#D7DBE3" font-family="Arial, Helvetica, sans-serif" font-size="18">Claim detail</text>
+  <text x="1210" y="840" fill="#F4F5F6" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700">star</text>
+</svg>
