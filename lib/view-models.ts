@@ -8,7 +8,7 @@ import {
   Prisma
 } from "@prisma/client";
 
-import { AnalyticsSnapshot, ExpenseClaim, NotificationItem, PolicyRule, WorkflowTemplate } from "@/lib/types";
+import { AnalyticsSnapshot, ExpenseClaim, ManagerApprovalItem, NotificationItem, PolicyRule, WorkflowTemplate } from "@/lib/types";
 
 type ClaimWithRelations = Prisma.ExpenseClaimGetPayload<{
   include: {
@@ -18,6 +18,18 @@ type ClaimWithRelations = Prisma.ExpenseClaimGetPayload<{
     approvalActions: { include: { actor: true } };
     approvalRequests: { include: { approver: true } };
     lineItems: true;
+  };
+}>;
+
+type ApprovalRequestWithRelations = Prisma.ApprovalRequestGetPayload<{
+  include: {
+    claim: {
+      include: {
+        employee: { include: { employeeProfile: { include: { department: true } } } };
+        receipts: { include: { ocrExtraction: true } };
+        fraudFlags: true;
+      };
+    };
   };
 }>;
 
@@ -109,6 +121,7 @@ export function mapClaimToView(claim: ClaimWithRelations): ExpenseClaim {
     approvalRequests: claim.approvalRequests.map((request) => ({
       id: request.id,
       claimId: claim.id,
+      approverId: request.approverId,
       stepName: request.stepName,
       approverName: request.approver.name,
       approverRole: request.approverRole as ExpenseClaim["approvalRequests"][number]["approverRole"],
@@ -126,6 +139,32 @@ export function mapClaimToView(claim: ClaimWithRelations): ExpenseClaim {
         detail: `${action.actor.name} · ${action.comment ?? "No comment"}`
       }))
     ]
+  };
+}
+
+export function mapManagerApprovalToView(approval: ApprovalRequestWithRelations): ManagerApprovalItem {
+  const receipt = approval.claim.receipts[0];
+  const submittedAt = approval.claim.createdAt;
+
+  return {
+    approvalRequestId: approval.id,
+    claimId: approval.claimId,
+    stepName: approval.stepName,
+    approverRole: approval.approverRole as ManagerApprovalItem["approverRole"],
+    employeeName: approval.claim.employee.name,
+    department: approval.claim.employee.employeeProfile?.department?.name ?? "Unassigned",
+    vendor: approval.claim.merchant,
+    description: approval.claim.description,
+    amount: approval.claim.convertedAmount,
+    companyCurrency: approval.claim.companyCurrency,
+    status: mapClaimStatus(approval.claim.status),
+    riskScore: approval.claim.riskScore,
+    fraudCount: approval.claim.fraudFlags.length,
+    hasReceipt: approval.claim.receipts.length > 0,
+    ocrConfidence: receipt?.ocrExtraction?.confidence ?? undefined,
+    submittedAt: submittedAt.toISOString(),
+    expenseDate: approval.claim.expenseDate.toISOString().slice(0, 10),
+    agingDays: Math.max(0, Math.ceil((Date.now() - submittedAt.getTime()) / (1000 * 60 * 60 * 24)))
   };
 }
 

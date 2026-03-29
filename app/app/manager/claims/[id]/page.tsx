@@ -24,6 +24,9 @@ export default async function ManagerClaimDetailPage({
   if (!claim) notFound();
 
   const workflow = (await listWorkflowTemplates(user.companyId))[0];
+  const currentApprovalRequestId =
+    claim.approvalRequests.find((request) => request.approverId === user.id && request.state === "PENDING")?.id ??
+    claim.approvalRequests[0]?.id;
 
   return (
     <div className="space-y-6">
@@ -56,7 +59,7 @@ export default async function ManagerClaimDetailPage({
                   : "No active policy blockers."}
               </p>
             </div>
-            <ApprovalActionPanel approvalRequestId={claim.approvalRequests[0]?.id} />
+            <ApprovalActionPanel approvalRequestId={currentApprovalRequestId} />
           </div>
         </Card>
       </div>

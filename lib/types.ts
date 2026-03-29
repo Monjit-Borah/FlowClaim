@@ -100,10 +100,34 @@ export interface ApprovalAction {
 export interface ApprovalRequest {
   id: string;
   claimId: string;
+  approverId?: string;
   stepName: string;
   approverName: string;
   approverRole: Role | "FINANCE" | "DIRECTOR" | "CFO";
   state: "PENDING" | "DONE";
+}
+
+export interface ManagerApprovalItem {
+  approvalRequestId: string;
+  claimId: string;
+  stepName: string;
+  approverRole: Role | "FINANCE" | "DIRECTOR" | "CFO";
+  employeeName: string;
+  department: string;
+  vendor: string;
+  description: string;
+  amount: number;
+  companyCurrency: string;
+  status: ClaimStatus;
+  riskScore: number;
+  fraudCount: number;
+  hasReceipt: boolean;
+  ocrConfidence?: number;
+  submittedAt: string;
+  expenseDate: string;
+  agingDays: number;
+  aiSuggestion?: string;
+  duplicateFlag?: boolean;
 }
 
 export interface PolicyViolation {

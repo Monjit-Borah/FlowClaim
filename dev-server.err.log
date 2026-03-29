@@ -1,0 +1,391 @@
+=file:C:/Users/Abhinav Mehta/Downloads/oddo/FlowClaim/prisma/dev.db : The term '=file:C:/Users/Abhinav 
+Mehta/Downloads/oddo/FlowClaim/prisma/dev.db' is not recognized as the name of a cmdlet, function, script file, or 
+operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try 
+again.
+At line:1 char:1
++ ='file:C:/Users/Abhinav Mehta/Downloads/oddo/FlowClaim/prisma/dev.db' ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=file:C:/Users/...m/prisma/dev.db:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+=http://localhost:3000 : The term '=http://localhost:3000' is not recognized as the name of a cmdlet, function, script 
+file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct 
+and try again.
+At line:1 char:72
++ ... loads/oddo/FlowClaim/prisma/dev.db'; ='http://localhost:3000'; ='repl ...
++                                          ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=http://localhost:3000:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+=replace-with-a-long-random-secret : The term '=replace-with-a-long-random-secret' is not recognized as the name of a 
+cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify 
+that the path is correct and try again.
+At line:1 char:98
++ ... 'http://localhost:3000'; ='replace-with-a-long-random-secret'; Set-Lo ...
++                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=replace-with-a-long-random-secret:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+Error [ZodError]: [
+  {
+    "code": "too_small",
+    "minimum": 6,
+    "type": "string",
+    "inclusive": true,
+    "exact": false,
+    "message": "String must contain at least 6 character(s)",
+    "path": [
+      "password"
+    ]
+  }
+]
+    at POST (app\api\auth\login\route.ts:13:23)
+  11 |
+  12 | export async function POST(request: Request) {
+> 13 |   const body = schema.parse(await request.json());
+     |                       ^
+  14 |   const user = await login(body.email, body.password);
+  15 |   if (!user) {
+  16 |     return NextResponse.json({ message: "Invalid credentials" }, { status: 401 }); {
+  issues: [Array],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async login (lib\services\auth-service.ts:10:16)
+    at async POST (app\api\auth\login\route.ts:14:16)
+   8 |
+   9 | export async function login(email: string, password: string) {
+> 10 |   const user = await prisma.user.findUnique({
+     |                ^
+  11 |     where: { email: email.toLowerCase() },
+  12 |     include: { role: true, employeeProfile: true }
+  13 |   }); {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+Error [PrismaClientInitializationError]: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at <unknown> (-->  schema.prisma:7)
+    at async signup (lib\services\auth-service.ts:32:20)
+    at async POST (app\api\auth\signup\route.ts:20:18)
+  30 |   approvalPreference?: string;
+  31 | }) {
+> 32 |   const existing = await prisma.user.findUnique({ where: { email: payload.email.toLowerCase() } });
+     |                    ^
+  33 |   if (existing) {
+  34 |     throw new Error("An account with this email already exists.");
+  35 |   } {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { createAuditLog } from "@/lib/services/audit-service";
 import { createNotification } from "@/lib/services/notification-service";
 import { evaluateApprovalRule } from "@/lib/services/workflow-engine";
+import { mapManagerApprovalToView } from "@/lib/view-models";
 
 async function moveClaimForward(claimId: string) {
   const claim = await prisma.expenseClaim.findUnique({
@@ -105,6 +106,24 @@ export async function getPendingApprovals(userId: string) {
     },
     orderBy: { createdAt: "asc" }
   });
+}
+
+export async function getPendingApprovalInbox(userId: string) {
+  const approvals = await prisma.approvalRequest.findMany({
+    where: { approverId: userId, state: ApprovalRequestState.PENDING },
+    include: {
+      claim: {
+        include: {
+          employee: { include: { employeeProfile: { include: { department: true } } } },
+          receipts: { include: { ocrExtraction: true } },
+          fraudFlags: true
+        }
+      }
+    },
+    orderBy: { createdAt: "asc" }
+  });
+
+  return approvals.map(mapManagerApprovalToView);
 }
 
 export async function applyApprovalAction(input: {

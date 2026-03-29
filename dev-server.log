@@ -1,0 +1,219 @@
+
+> claimflow-ai@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3000
+   - Network:      http://10.20.52.203:3000
+
+ ✓ Starting...
+ ✓ Ready in 2s
+ ○ Compiling / ...
+ ✓ Compiled / in 6.2s (624 modules)
+ GET / 200 in 7025ms
+ GET / 200 in 187ms
+ GET / 200 in 160ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 859ms (651 modules)
+ GET /login 200 in 1114ms
+ GET /login 200 in 79ms
+ ○ Compiling /api/auth/login ...
+ ✓ Compiled /api/auth/login in 1004ms (741 modules)
+ POST /api/auth/login 500 in 1561ms
+ ✓ Compiled /signup in 338ms (748 modules)
+ GET /signup 200 in 498ms
+ ✓ Compiled /api/company/countries in 371ms (751 modules)
+ GET /api/company/countries 200 in 3017ms
+ GET /api/company/countries 200 in 38ms
+ ✓ Compiled /api/auth/signup in 270ms (753 modules)
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 518ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 191ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 165ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 145ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 159ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 148ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 154ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 175ms
+ GET /signup 200 in 300ms
+ GET /api/company/countries 200 in 38ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 179ms
+ GET /login 200 in 79ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/login 500 in 294ms
+ GET / 200 in 227ms
+ GET / 200 in 294ms
+ GET /login 200 in 93ms
+ GET /signup 200 in 49ms
+ GET /api/company/countries 200 in 37ms
+ GET /api/company/countries 200 in 38ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 202ms
+ GET /signup 200 in 60ms
+ GET /api/company/countries 200 in 37ms
+ GET /api/company/countries 200 in 46ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 179ms
+prisma:error 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "sqlite"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+ POST /api/auth/signup 500 in 188ms
+ ✓ Compiled in 944ms (659 modules)
+ GET /signup 200 in 190ms
+ ✓ Compiled in 1071ms (637 modules)
+ GET /signup 200 in 1042ms
+ ✓ Compiled (623 modules)
+ GET /signup 200 in 57ms
+ ✓ Compiled in 185ms (251 modules)
+ ✓ Compiled in 256ms (251 modules)
+ GET /signup 200 in 261ms
+ GET /signup 200 in 56ms
