@@ -23,23 +23,28 @@ This repository contains a working Next.js full-stack implementation with Prisma
 
 ### Landing experience
 
-![ClaimFlow AI landing page](./docs/images/landing-screen.svg)
+![ClaimFlow AI landing page](./docs/images/landing-screen.png)
+
+### Sign Up experience
+
+![ClaimFlow AI landing page](./docs/images/sign-up.png)
+
 
 ### Admin command center
 
-![ClaimFlow AI admin dashboard](./docs/images/admin-dashboard.svg)
+![ClaimFlow AI admin dashboard](./docs/images/admin-dashboard.png)
 
 ### Manager approval dashboard
 
-![ClaimFlow AI manager approval dashboard](./docs/images/manager-dashboard.svg)
+![ClaimFlow AI manager approval dashboard](./docs/images/manager-dashboard.png)
 
 ### Employee reimbursement workspace
 
-![ClaimFlow AI employee dashboard](./docs/images/employee-dashboard.svg)
+![ClaimFlow AI employee dashboard](./docs/images/employee-dashboard.png)
 
 ### Approval rules management
 
-![ClaimFlow AI approval rules management](./docs/images/admin-workflows.svg)
+![ClaimFlow AI approval rules management](./docs/images/admin-workflows.png)
 
 ## Core Capabilities
 
